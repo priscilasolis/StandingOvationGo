@@ -7,6 +7,8 @@ import (
 	  "bytes"
     "strings"
     "strconv"
+    "log"
+    "io"
 )
 
     var tests, checkAt int
@@ -23,61 +25,54 @@ import (
 
 
 func main(){
-      getTests()
+      lines, err := readLines("small.in")
+      if err != nil {
+      log.Fatalf("readLines: %s", err)
+      }
 
-      if(tests < 1 || tests > 100){
-            fmt.Println("Tests are between 1 and 100")
+      for i, line := range lines {
+        if(i == 0){
+          testNum = line
+          tests = getInt(testNum)
+          break
         }
-    //createArrays
-    inText := make([]string, tests)
-    inSMax := make([]int, tests)
-    out := make([]int, tests)
+      }
 
+      inText := make([]string, tests)
+      inSMax := make([]int, tests)
+      out := make([]int, tests)
 
-    for n := 0; n < tests; n++{
-      inText[n] = askInput() //obtains text as Input
-      inSMax[n] = getSMax(inText[n])  //gets SMax and determines where other text starts
-    }
-
-    for n := 0; n < tests; n++{
-      out[n] = peopleStanding(inText[n], inSMax[n]) //obtains value of result
-    }
-
-    for n := 0; n < tests; n++{
-      fmt.Print("Case #", (n+1) , ": ", out[n], "\n") //obtains value of result
-    }
-
-}
-
-func getTests(){
-  fmt.Print("Tests: ")
-  consoleReader := bufio.NewReader(os.Stdin)
-  testNum, _ = consoleReader.ReadString('\n')
-  testNum = strings.TrimSuffix(testNum, "\n")
-
-
-   for i := 0; i < (len((testNum)) - 1) ; i++ {
-        if( testNum[i] != ' '){
-        runes := []rune(testNum)
-        t.WriteString(string(runes[i]))
+      for i, line := range lines {
+        if(i == 0){
+          testNum = line
+        } else if(i <= tests){
+          inText[i-1] = line
+          inSMax[i-1] = getSMax(inText[i-1])
+        } else{
+          break
         }
-    }
+        }
 
-    tests = getInt(t.String())
-}
 
-func askInput()(text string){
-      fmt.Print("Input: ")
-      consoleReader := bufio.NewReader(os.Stdin)
-      text, _ = consoleReader.ReadString('\n')
-      text = strings.TrimSuffix(text, "\n")
+        for n := 0; n < tests; n++{
+          out[n] = peopleStanding(inText[n], inSMax[n]) //obtains value of result
+        }
 
-    return
 
+        fo, _ := os.Create("results.txt")
+
+        var s, nAsText, outAsText string
+
+        for n := 0; n < tests; n++{
+          nAsText = strconv.Itoa(n+1)
+          outAsText = strconv.Itoa(out[n])
+          s = "Case #" + nAsText + ": " + outAsText + "\r\n"
+      	  _, _ = io.Copy(fo, strings.NewReader(s))
+        }
 }
 
 func getSMax(text string)(checkAt int){
-   for i := 0; i < (len((text)) - 1) ; i++ {
+   for i := 0; i < len((text)) ; i++ {
 
         if( text[i] != ' '){
           runes := []rune(text)
@@ -100,7 +95,7 @@ func peopleStanding(inputText string, inputCheckAt int)(friendsInvited int){
 
     caseNumber++
 
-    for i := inputCheckAt; i < (len((inputText)) - 1); i++ {
+    for i := inputCheckAt; i < (len((inputText))); i++ {
         if(i == inputCheckAt || getInt(string(runes[i])) == 0){
         standing += getInt(string(runes[i]))
         sLevel++
@@ -124,4 +119,19 @@ func getInt(x string) (y int){
              return
            }
         return
+}
+
+func readLines(path string) ([]string, error) {
+  file, err := os.Open(path)
+  if err != nil {
+    return nil, err
+  }
+  defer file.Close()
+
+  var lines []string
+  scanner := bufio.NewScanner(file)
+  for scanner.Scan() {
+    lines = append(lines, scanner.Text())
+  }
+  return lines, scanner.Err()
 }
