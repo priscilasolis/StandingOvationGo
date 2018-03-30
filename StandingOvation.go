@@ -95,7 +95,7 @@ func peopleStanding(inputText string, inputCheckAt int)(friendsInvited int){
 
     caseNumber++
 
-    for i := inputCheckAt; i < (len((inputText))); i++ {
+    for i := inputCheckAt; i < len((inputText)) ; i++ {
         if(i == inputCheckAt || getInt(string(runes[i])) == 0){
         standing += getInt(string(runes[i]))
         sLevel++
@@ -104,7 +104,7 @@ func peopleStanding(inputText string, inputCheckAt int)(friendsInvited int){
         sLevel++
         } else{
         friendsInvited += sLevel - standing
-        standing += (friendsInvited + getInt(string(runes[i])))
+        standing += (sLevel + getInt(string(runes[i])) - standing)
         sLevel++
         }
     }
